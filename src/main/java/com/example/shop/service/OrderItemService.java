@@ -2,7 +2,10 @@ package com.example.shop.service;
 
 import com.example.shop.model.OrderItem;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -30,7 +33,7 @@ public class OrderItemService {
 
     public List<OrderItem> getOrderItemsByOrderId(Long orderId) {
         return orderItems.values().stream()
-                .filter(item -> orderId.equals(item.getOrderId()))
+                .filter(item -> orderId.equals(item.getOrder().getId()))
                 .collect(Collectors.toList());
     }
 
@@ -50,6 +53,6 @@ public class OrderItemService {
     }
 
     public void deleteOrderItemsByOrderId(Long orderId) {
-        orderItems.entrySet().removeIf(entry -> orderId.equals(entry.getValue().getOrderId()));
+        orderItems.entrySet().removeIf(entry -> orderId.equals(entry.getValue().getOrder().getId()));
     }
-}
+    }

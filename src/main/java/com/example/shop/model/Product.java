@@ -1,24 +1,42 @@
 package com.example.shop.model;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import java.math.BigDecimal;
-
-@Data
+import lombok.*;
+import jakarta.validation.constraints.PositiveOrZero;
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Entity
+@Table(name = "products", uniqueConstraints = @UniqueConstraint(columnNames = {"name", "category_id"}))
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Название товара обязательно")
+    @NotBlank
     private String name;
 
     private String description;
 
-    @NotNull(message = "Цена обязательна")
-    @Positive(message = "Цена должна быть положительной")
-    private BigDecimal price;
+    @Positive
+    private Double price;
 
-    @NotNull(message = "Категория обязательна")
-    private Long categoryId;
+    @PositiveOrZero
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer stock = 0; // количество товара на складе
+
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", nullable = false)
+    @NotNull
+    @JsonIgnoreProperties({"products"})
+    private Category category;
+
 }

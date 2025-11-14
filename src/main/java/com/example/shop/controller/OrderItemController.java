@@ -1,51 +1,41 @@
 package com.example.shop.controller;
 
 import com.example.shop.model.OrderItem;
-import com.example.shop.service.OrderItemService;
+import com.example.shop.service.ShopService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/order-items")
+@RequiredArgsConstructor
 public class OrderItemController {
-    private final OrderItemService orderItemService;
-
-    public OrderItemController(OrderItemService orderItemService) {
-        this.orderItemService = orderItemService;
-    }
+    private final ShopService svc;
 
     @PostMapping
-    public ResponseEntity<OrderItem> createOrderItem(@Valid @RequestBody OrderItem orderItem) {
-        return ResponseEntity.ok(orderItemService.createOrderItem(orderItem));
+    public OrderItem create(@Valid @RequestBody OrderItem oi) {
+        return svc.createOrderItem(oi);
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderItem>> getAllOrderItems() {
-        return ResponseEntity.ok(orderItemService.getAllOrderItems());
+    public List<OrderItem> all() {
+        return svc.listOrderItems();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<OrderItem> getOrderItemById(@PathVariable Long id) {
-        OrderItem orderItem = orderItemService.getOrderItemById(id);
-        return orderItem != null ? ResponseEntity.ok(orderItem) : ResponseEntity.notFound().build();
+    @GetMapping("/<built-in function id>")
+    public OrderItem one(@PathVariable Long id) {
+        return svc.getOrderItem(id);
     }
 
-    @GetMapping("/order/{orderId}")
-    public ResponseEntity<List<OrderItem>> getOrderItemsByOrderId(@PathVariable Long orderId) {
-        return ResponseEntity.ok(orderItemService.getOrderItemsByOrderId(orderId));
+    @PutMapping("/<built-in function id>")
+    public OrderItem update(@PathVariable Long id, @Valid @RequestBody OrderItem oi) {
+        return svc.updateOrderItem(id, oi);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<OrderItem> updateOrderItem(@PathVariable Long id, @Valid @RequestBody OrderItem orderItem) {
-        OrderItem updated = orderItemService.updateOrderItem(id, orderItem);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrderItem(@PathVariable Long id) {
-        boolean deleted = orderItemService.deleteOrderItem(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    @DeleteMapping("/<built-in function id>")
+    public void delete(@PathVariable Long id) {
+        svc.deleteOrderItem(id);
     }
 }

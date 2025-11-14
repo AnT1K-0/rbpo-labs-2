@@ -3,7 +3,10 @@ package com.example.shop.service;
 import com.example.shop.model.Order;
 import com.example.shop.model.OrderItem;
 import org.springframework.stereotype.Service;
-import java.util.*;
+import com.example.shop.model.OrderStatus;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,17 +23,20 @@ public class OrderService {
     // CREATE
     public Order createOrder(Order order) {
         order.setId(nextId.getAndIncrement());
-        order.setOrderDate(java.time.LocalDateTime.now());
+        order.setOrderDate(java.time.OffsetDateTime.now());
 
-        // Сохраняем OrderItems
-        for (OrderItem item : order.getItems()) {
-            item.setOrderId(order.getId());
-            orderItemService.createOrderItem(item);
+        // подстрахуемся, если items == null
+        if (order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                item.setOrder(order);
+                orderItemService.createOrderItem(item);
+            }
         }
 
         orders.put(order.getId(), order);
         return order;
     }
+
 
     // READ
     public List<Order> getAllOrders() {
@@ -56,11 +62,19 @@ public class OrderService {
     public boolean updateOrderStatus(Long id, String status) {
         Order order = orders.get(id);
         if (order != null) {
-            order.setStatus(status);
-            return true;
+            try {
+                // Преобразуем строку в значение enum (без учёта регистра)
+                OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
+                order.setStatus(newStatus);
+                return true;
+            } catch (IllegalArgumentException e) {
+                // если передан некорректный статус
+                return false;
+            }
         }
         return false;
     }
+
 
     // DELETE
     public boolean deleteOrder(Long id) {

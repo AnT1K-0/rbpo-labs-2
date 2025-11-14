@@ -1,20 +1,42 @@
 package com.example.shop.model;
 
-import lombok.Data;
+
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import lombok.*;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@Entity
+@Table(name = "orders")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Order {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDateTime orderDate;
-    private String status = "CREATED";
-
-    @NotNull(message = "Покупатель обязателен")
-    private Long customerId;
-
-    @NotNull(message = "Список товаров не может быть пустым")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    @NotNull
+    private Customer customer;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status = OrderStatus.CREATED;
+    @Column(nullable = false)
+    private OffsetDateTime orderDate = OffsetDateTime.now();
+    @Column(nullable = false)
+    private Double total = 0.0;
+    @JsonManagedReference
+@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
 }

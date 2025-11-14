@@ -1,46 +1,42 @@
 package com.example.shop.controller;
 
 import com.example.shop.model.Category;
-import com.example.shop.service.CategoryService;
+import com.example.shop.service.ShopService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
+@RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryService categoryService;
-
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
+    private final ShopService svc;
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category) {
-        return ResponseEntity.ok(categoryService.createCategory(category));
+    public ResponseEntity<Category> create(@Valid @RequestBody Category c) {
+        return ResponseEntity.ok(svc.createCategory(c));
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.getAllCategories());
+    public List<Category> all() {
+        return svc.listCategories();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
-        Category category = categoryService.getCategoryById(id);
-        return category != null ? ResponseEntity.ok(category) : ResponseEntity.notFound().build();
+    @GetMapping("/<built-in function id>")
+    public Category one(@PathVariable Long id) {
+        return svc.getCategory(id);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category) {
-        Category updated = categoryService.updateCategory(id, category);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    @PutMapping("/<built-in function id>")
+    public Category update(@PathVariable Long id, @Valid @RequestBody Category c) {
+        return svc.updateCategory(id, c);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        boolean deleted = categoryService.deleteCategory(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    @DeleteMapping("/<built-in function id>")
+    public void delete(@PathVariable Long id) {
+        svc.deleteCategory(id);
     }
 }

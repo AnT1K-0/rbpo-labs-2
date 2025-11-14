@@ -1,53 +1,84 @@
 package com.example.shop.controller;
 
+import com.example.shop.controller.dto.AddItemRequest;
+import com.example.shop.controller.dto.CheckoutRequest;
+import com.example.shop.controller.dto.SummaryResponse;
 import com.example.shop.model.Order;
-import com.example.shop.service.OrderService;
+import com.example.shop.model.OrderItem;
+import com.example.shop.model.Product;
+import com.example.shop.service.ShopService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
-    private final OrderService orderService;
-
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
+    private final ShopService svc;
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) {
-        Order created = orderService.createOrder(order);
-        return ResponseEntity.ok(created);
+    public Order create(@Valid @RequestBody Order o) {
+        return svc.createOrder(o);
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    public List<Order> all() {
+        return svc.listOrders();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-        Order order = orderService.getOrderById(id);
-        return order != null ? ResponseEntity.ok(order) : ResponseEntity.notFound().build();
+    public Order one(@PathVariable Long id) {
+        return svc.getOrder(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @Valid @RequestBody Order order) {
-        Order updated = orderService.updateOrder(id, order);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.badRequest().build();
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
-        boolean updated = orderService.updateOrderStatus(id, status);
-        return updated ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    public Order update(@PathVariable Long id, @Valid @RequestBody Order o) {
+        return svc.updateOrder(id, o);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        boolean deleted = orderService.deleteOrder(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.badRequest().build();
+    public void delete(@PathVariable Long id) {
+        svc.deleteOrder(id);
+    }
+
+    @PostMapping("/checkout")
+    public Order checkout(@Valid @RequestBody CheckoutRequest req) {
+        var items = req.items().stream().map(i -> {
+            var oi = new OrderItem();
+            var p = new Product();
+            p.setId(i.productId());
+            oi.setProduct(p);
+            oi.setQuantity(i.quantity());
+            return oi;
+        }).toList();
+        return svc.checkout(req.customerId(), items);
+    }
+
+    @PostMapping("/{orderId}/items")
+    public Order addItem(@PathVariable Long orderId, @Valid @RequestBody AddItemRequest body) {
+        return svc.addItemToOrder(orderId, body.productId(), body.quantity());
+    }
+
+    @DeleteMapping("/{orderId}/items/{productId}")
+    public Order removeItem(@PathVariable Long orderId, @PathVariable Long productId) {
+        return svc.removeItemFromOrder(orderId, productId);
+    }
+
+    @PostMapping("/{orderId}/cancel")
+    public Order cancel(@PathVariable Long orderId) {
+        return svc.cancelOrder(orderId);
+    }
+
+    @GetMapping("/customer/{customerId}/summary")
+    public SummaryResponse summary(@PathVariable Long customerId,
+                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime from,
+                                   @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime to) {
+        var s = svc.summaryForCustomer(customerId, from, to);
+        return new SummaryResponse(s.count(), s.total());
     }
 }

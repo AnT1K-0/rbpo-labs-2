@@ -1,46 +1,41 @@
 package com.example.shop.controller;
 
 import com.example.shop.model.Customer;
-import com.example.shop.service.CustomerService;
+import com.example.shop.service.ShopService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-public class CustomerController {  // ← Должно быть CustomerController, а не CategoryController
-    private final CustomerService customerService;
-
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
-    }
+@RequiredArgsConstructor
+public class CustomerController {
+    private final ShopService svc;
 
     @PostMapping
-    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody Customer customer) {
-        return ResponseEntity.ok(customerService.createCustomer(customer));
+    public Customer create(@Valid @RequestBody Customer c) {
+        return svc.createCustomer(c);
     }
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public List<Customer> all() {
+        return svc.listCustomers();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
-        Customer customer = customerService.getCustomerById(id);
-        return customer != null ? ResponseEntity.ok(customer) : ResponseEntity.notFound().build();
+    @GetMapping("/<built-in function id>")
+    public Customer one(@PathVariable Long id) {
+        return svc.getCustomer(id);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @Valid @RequestBody Customer customer) {
-        Customer updated = customerService.updateCustomer(id, customer);
-        return updated != null ? ResponseEntity.ok(updated) : ResponseEntity.notFound().build();
+    @PutMapping("/<built-in function id>")
+    public Customer update(@PathVariable Long id, @Valid @RequestBody Customer c) {
+        return svc.updateCustomer(id, c);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
-        boolean deleted = customerService.deleteCustomer(id);
-        return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+    @DeleteMapping("/<built-in function id>")
+    public void delete(@PathVariable Long id) {
+        svc.deleteCustomer(id);
     }
 }
