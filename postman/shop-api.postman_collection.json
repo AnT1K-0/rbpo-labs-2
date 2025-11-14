@@ -1,125 +1,38 @@
 {
   "info": {
-    "_postman_id": "b7ee571c-1cce-42c3-8f26-cf61228b4dda",
-    "name": "Shop API (rbpo-labs-2)",
+    "name": "Shop API (RBPO Labs 2-4)",
+    "_postman_id": "c2f0c2af-5fd6-45ff-aa3e-shop-api",
+    "description": "Postman collection for RBPO Labs 2-4: CRUD, business operations, security.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost:8080"
     }
   ],
   "item": [
     {
-      "name": "Categories",
+      "name": "Auth",
       "item": [
         {
-          "name": "Create category",
+          "name": "Register User",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Phones\",\n  \"description\": \"Smartphones and devices\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/categories",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "categories"
-              ]
+              "raw": "{\n  \"username\": \"{{registerEmail}}\",\n  \"password\": \"{{registerPassword}}\"\n}"
             }
-          }
-        },
-        {
-          "name": "Get all categories",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/categories",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "categories"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get category by id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/categories/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "categories",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update category",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Phones\",\n  \"description\": \"Updated description\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/categories/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "categories",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete category",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/categories/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "categories",
-                "1"
-              ]
-            }
-          }
+          },
+          "response": []
         }
       ]
     },
@@ -127,567 +40,114 @@
       "name": "Products",
       "item": [
         {
-          "name": "Create product",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"iPhone 15\",\n  \"description\": \"Flagship phone\",\n  \"price\": 999.99,\n  \"stock\": 10,\n  \"category\": {\n    \"id\": 1\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get all products",
+          "name": "Get all products (public)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/products",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get product by id",
+          "name": "Create product (ADMIN)",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "1"
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{authUsername}}", "type": "string" },
+                { "key": "password", "value": "{{authPassword}}", "type": "string" }
               ]
-            }
-          }
-        },
-        {
-          "name": "Update product",
-          "request": {
-            "method": "PUT",
+            },
+            "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"Updated model\",\n  \"price\": 1099.99,\n  \"stock\": 5,\n  \"category\": {\n    \"id\": 1\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "1"
-              ]
+              "raw": "{\n  \"name\": \"Test product\",\n  \"description\": \"Created from Postman\",\n  \"price\": 100.0,\n  \"stock\": 10,\n  \"category\": {\"id\": 1}\n}"
             }
-          }
-        },
-        {
-          "name": "Delete product",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/products/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "products",
-                "1"
-              ]
-            }
-          }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Customers",
+      "name": "Orders",
       "item": [
         {
-          "name": "Create customer",
+          "name": "Checkout order (USER)",
           "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{authUsername}}", "type": "string" },
+                { "key": "password", "value": "{{authPassword}}", "type": "string" }
+              ]
+            },
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Ivan\",\n  \"lastName\": \"Ivanov\",\n  \"email\": \"ivan@example.com\",\n  \"phone\": \"+49111111111\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/customers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "customers"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get all customers",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/customers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "customers"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get customer by id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "customers",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update customer",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Ivan\",\n  \"lastName\": \"Updated\",\n  \"email\": \"ivan@example.com\",\n  \"phone\": \"+49999999999\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "customers",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete customer",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "customers",
-                "1"
-              ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Orders (CRUD + business)",
-      "item": [
-        {
-          "name": "Create empty order (draft)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customer\": {\n    \"id\": 1\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/orders",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get all orders",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get order by id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update order (status/date/total)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customer\": {\n    \"id\": 1\n  },\n  \"status\": \"CREATED\",\n  \"orderDate\": \"2025-01-01T10:00:00Z\",\n  \"total\": 0.0\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete order",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Checkout order",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"customerId\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"productId\": 2,\n      \"quantity\": 1\n    }\n  ]\n}"
-            },
             "url": {
               "raw": "{{baseUrl}}/api/orders/checkout",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "checkout"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Add item to order",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "checkout"]
+            },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productId\": 1,\n  \"quantity\": 1\n}"
+              "raw": "{\n  \"customerId\": 1,\n  \"items\": [\n    { \"productId\": 1, \"quantity\": 1 }\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel order (USER/ADMIN)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{authUsername}}", "type": "string" },
+                { "key": "password", "value": "{{authPassword}}", "type": "string" }
+              ]
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/1/items",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1",
-                "items"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Remove item from order",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/1/items/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1",
-                "items",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Cancel order",
-          "request": {
             "method": "POST",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/orders/1/cancel",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "1",
-                "cancel"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "1", "cancel"]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Customer summary for period",
+          "name": "Customer summary (USER/ADMIN)",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/customer/1/summary?from=2025-01-01T00:00:00Z&to=2025-12-31T23:59:59Z",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "orders",
-                "customer",
-                "1",
-                "summary"
-              ],
-              "query": [
-                {
-                  "key": "from",
-                  "value": "2025-01-01T00:00:00Z"
-                },
-                {
-                  "key": "to",
-                  "value": "2025-12-31T23:59:59Z"
-                }
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{authUsername}}", "type": "string" },
+                { "key": "password", "value": "{{authPassword}}", "type": "string" }
               ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Order items (CRUD)",
-      "item": [
-        {
-          "name": "Create order item",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"order\": {\n    \"id\": 1\n  },\n  \"product\": {\n    \"id\": 1\n  },\n  \"quantity\": 1,\n  \"price\": 999.99\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/api/order-items",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "order-items"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get all order items",
-          "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/order-items",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "order-items"
-              ]
+              "raw": "{{baseUrl}}/api/orders/customer/1/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "customer", "1", "summary"]
             }
-          }
-        },
-        {
-          "name": "Get order item by id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/order-items/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "order-items",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update order item",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"order\": {\n    \"id\": 1\n  },\n  \"product\": {\n    \"id\": 1\n  },\n  \"quantity\": 2,\n  \"price\": 999.99\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/order-items/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "order-items",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Delete order item",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/order-items/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "order-items",
-                "1"
-              ]
-            }
-          }
+          },
+          "response": []
         }
       ]
     }

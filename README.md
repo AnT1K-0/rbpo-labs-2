@@ -1,106 +1,107 @@
+# Shop — RBPO Labs 2–4
+
+Проект представляет собой  интернет-магазин.  
+Реализованы CRUD-операции, бизнес-логика заказов, работа с PostgreSQL, миграции Flyway и защита API (Basic Auth, роли, CSRF).
+
+---
+
 ## Основные сущности
 
-| Сущность | Назначение |
-|----------|------------|
-| **Category** | Категории товаров |
-| **Product** | Товары (цена, остаток, описание, связь с категорией) |
-| **Customer** | Покупатели (уникальный email) |
-| **Order** | Заказы, статусы (`CREATED`, `PAID`, `CANCELLED`) |
-| **OrderItem** | Позиции заказа (количество, цена, товар) |
+| Сущность | Описание |
+|----------|----------|
+| Category | Категории товаров |
+| Product | Товары (связь с категорией, цена, остаток) |
+| Customer | Покупатели (email уникален) |
+| Order | Заказы (CREATED, PAID, CANCELLED) |
+| OrderItem | Позиции заказа |
+| UserAccount | Пользователь системы (логин, пароль, роль) |
 
 ---
 
 ## Используемые технологии
 
 - Java 17+
-- Spring Boot
-- Spring Data JPA (Hibernate)
+- Spring Boot (Web, Data JPA, Security, Validation)
 - PostgreSQL
-- Flyway (миграции БД)
+- Flyway
 - Maven
-- Validation (Jakarta)
 - Lombok
-- Postman (для тестирования API)
+- Postman
 
 ---
 
 ## Как запустить проект
 
-### Установить зависимости
+### Требования
 
 - Java 17+
 - PostgreSQL
 - Maven
 
-###  Создать базу данных
+### Создать базу данных
 
 ```sql
 CREATE DATABASE shop;
 ```
 
-###  Настроить переменные окружения
-
-Перед запуском задать:
+### Настроить переменные окружения
 
 | Переменная | Значение |
 |-----------|----------|
-| `POSTGRES_USER` | имя пользователя |
-| `POSTGRES_PASSWORD` | пароль |
-| `POSTGRES_DB` | `shop` |
-| `POSTGRES_HOST` | `localhost` |
-| `POSTGRES_PORT` | `5432` |
+| POSTGRES_USER | пользователь БД |
+| POSTGRES_PASSWORD | пароль |
+| POSTGRES_DB | shop |
+| POSTGRES_HOST | localhost |
+| POSTGRES_PORT | 5432 |
 
+### Запуск приложения
 
-
-### 4️Запуск приложения
-
-```sh
+```bash
 mvn spring-boot:run
 ```
 
-При старте Flyway создаст таблицы и вставит тестовые данные.
+После запуска Flyway автоматически создаст таблицы и тестовые данные.
 
 ---
 
 ## Flyway миграции
 
-Файлы находятся в:
+Путь:
 
 ```
 src/main/resources/db/migration/
 ```
 
-- `V1__schema.sql` → создание таблиц и связей
-- `V2__seed.sql` → тестовые данные (категории, товары, покупатели)
-- `V3__align_price_types.sql` → корректировки схемы
+| Файл | Назначение |
+|------|-----------|
+| V1__schema.sql | создание схемы БД |
+| V2__seed.sql | тестовые данные |
+| V3__align_price_types.sql | корректировки |
+| V4__users.sql | таблица пользователей |
 
 ---
 
 ## Postman коллекция
 
-Для тестирования API используется Postman.
+Файл:
 
-Коллекция:  
 ```
 postman/shop-api.postman_collection.json
 ```
 
-Импортируйте её в Postman → выберите переменную:
+Перед использованием установить переменную:
+
 ```
 baseUrl = http://localhost:8080
 ```
 
 ---
 
-## CRUD-операции (по всем сущностям)
+## CRUD-операции
 
-- `POST /api/categories`
-- `GET /api/categories`
-- `PUT /api/categories/{id}`
-- `DELETE /api/categories/{id}`
+Реализованы маршруты для сущностей:
 
-Аналогично реализованы:
-
+- `/api/categories`
 - `/api/products`
 - `/api/customers`
 - `/api/orders`
@@ -108,17 +109,99 @@ baseUrl = http://localhost:8080
 
 ---
 
-##  Бизнес-операции
+## Бизнес-операции
 
 | Операция | Endpoint | Описание |
 |----------|----------|----------|
-| Checkout | `POST /api/orders/checkout` | Создание заказа, списание остатков, статус → PAID |
-| Cancel order | `POST /api/orders/{id}/cancel` | Отмена заказа и возврат остатков на склад |
-| Add item | `POST /api/orders/{id}/items` | Добавление позиции (только если статус `CREATED`) |
-| Remove item | `DELETE /api/orders/{id}/items/{itemId}` | Удаление позиции из заказа |
-| Customer summary | `GET /api/orders/customer/{id}/summary` | Итоговая статистика по клиенту |
+| Checkout | POST /api/orders/checkout | оформление заказа и списание остатков |
+| Cancel order | POST /api/orders/{id}/cancel | отмена заказа и возврат товаров |
+| Add item | POST /api/orders/{id}/items | добавить товар в заказ |
+| Remove item | DELETE /api/orders/{id}/items/{itemId} | удалить товар из заказа |
+| Customer summary | GET /api/orders/customer/{id}/summary | статистика заказов клиента |
 
 ---
 
+# Безопасность (Лабораторная №4)
 
+## Аутентификация
 
+- Используется Basic Auth
+- Пользователи хранятся в таблице `users`
+- Пароли — BCrypt-хэш
+- Реализована регистрация пользователей:
+
+```
+POST /api/auth/register
+```
+
+Пример JSON:
+
+```json
+{
+  "username": "user@example.com",
+  "password": "Qwerty!1"
+}
+```
+
+Включена проверка сложности пароля.
+
+---
+
+## Авторизация по ролям
+
+Роли:
+
+| Роль | Доступ |
+|------|--------|
+| ROLE_USER | операции с заказами, просмотр каталога |
+| ROLE_ADMIN | управление товарами, категориями и клиентами |
+
+Матрица доступа:
+
+| Endpoint | Доступ |
+|----------|--------|
+| POST /api/auth/register | доступен без авторизации |
+| GET /api/products, GET /api/categories | доступно всем |
+| /api/products/**, /api/categories/**, /api/customers/** | только ROLE_ADMIN |
+| /api/orders/**, /api/order-items/** | ROLE_USER и ROLE_ADMIN |
+| Остальные | требуют авторизацию |
+
+---
+
+## CSRF защита
+
+Включён `CookieCsrfTokenRepository`.
+
+- Токен хранится в cookie `XSRF-TOKEN`
+- Клиент отправляет его в заголовке:
+
+```
+X-XSRF-TOKEN: <token>
+```
+
+Для удобства работы через Postman CSRF отключён для:
+
+```
+/api/auth/**
+/api/orders/**
+/api/order-items/**
+```
+
+Для административных запросов CSRF включён.
+
+---
+
+## Статус выполнения
+
+| Компонент | Состояние |
+|----------|-----------|
+| CRUD | выполнено |
+| Работа с БД + Flyway | выполнено |
+| Бизнес-логика | выполнено |
+| Регистрация и проверка пароля | выполнено |
+| Авторизация по ролям | выполнено |
+| Basic Auth | выполнено |
+| CSRF | выполнено |
+| Postman коллекция | добавлена |
+
+---
