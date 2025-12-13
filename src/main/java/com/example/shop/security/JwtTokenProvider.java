@@ -23,12 +23,15 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
+    private static final String CLAIM_TYPE = "type";
+    private static final String CLAIM_SID = "sid";
+    private static final String CLAIM_ROLE = "role";
+
     private final UserDetailsService userDetailsService;
     private final Key key;
     private final long accessTokenValidityMs;
     private final long refreshTokenValidityMs;
 
-    // ВАЖНО: один явный конструктор, Spring будет использовать его
     public JwtTokenProvider(
             UserDetailsService userDetailsService,
             @Value("${app.jwt.secret}") String secret,
@@ -42,22 +45,42 @@ public class JwtTokenProvider {
     }
 
     public String generateAccessToken(UserAccount user, Long sessionId) {
-        return buildToken(user, sessionId, accessTokenValidityMs, "ACCESS");
+        return buildAccessToken(user, sessionId);
     }
 
     public String generateRefreshToken(UserAccount user, Long sessionId) {
-        return buildToken(user, sessionId, refreshTokenValidityMs, "REFRESH");
+        return buildRefreshToken(user, sessionId);
     }
 
-    private String buildToken(UserAccount user, Long sessionId, long validityMs, String type) {
+    private String buildAccessToken(UserAccount user, Long sessionId) {
         Instant now = Instant.now();
         Date issuedAt = Date.from(now);
-        Date expiry = Date.from(now.plusMillis(validityMs));
+        Date expiry = Date.from(now.plusMillis(accessTokenValidityMs));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("type", type);
-        claims.put("sid", sessionId);
-        claims.put("role", user.getRole()); // если у тебя поле иначе называется — поправь тут
+        claims.put(CLAIM_TYPE, "ACCESS");
+        claims.put(CLAIM_SID, sessionId);
+        // role кладём только в ACCESS (для демонстрации, но фильтр всё равно берёт роли из БД)
+        claims.put(CLAIM_ROLE, user.getRole());
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .setIssuedAt(issuedAt)
+                .setExpiration(expiry)
+                .addClaims(claims)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private String buildRefreshToken(UserAccount user, Long sessionId) {
+        Instant now = Instant.now();
+        Date issuedAt = Date.from(now);
+        Date expiry = Date.from(now.plusMillis(refreshTokenValidityMs));
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(CLAIM_TYPE, "REFRESH");
+        claims.put(CLAIM_SID, sessionId);
+
 
         return Jwts.builder()
                 .setSubject(user.getUsername())
@@ -79,12 +102,14 @@ public class JwtTokenProvider {
     private boolean validateToken(String token, String expectedType) {
         try {
             Claims claims = parseClaims(token);
-            String type = claims.get("type", String.class);
+
+            String type = claims.get(CLAIM_TYPE, String.class);
             if (!expectedType.equals(type)) {
                 return false;
             }
-            Date expiration = claims.getExpiration();
-            return expiration != null && expiration.after(new Date());
+
+            Date exp = claims.getExpiration();
+            return exp != null && exp.after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
@@ -99,20 +124,11 @@ public class JwtTokenProvider {
     }
 
     public Long getSessionId(String token) {
-        Claims claims = parseClaims(token);
-        Object sid = claims.get("sid");
-        if (sid == null) {
-            return null;
-        }
-        if (sid instanceof Integer i) {
-            return i.longValue();
-        }
-        if (sid instanceof Long l) {
-            return l;
-        }
-        if (sid instanceof String s) {
-            return Long.parseLong(s);
-        }
+        Object sid = parseClaims(token).get(CLAIM_SID);
+        if (sid == null) return null;
+        if (sid instanceof Integer i) return i.longValue();
+        if (sid instanceof Long l) return l;
+        if (sid instanceof String s) return Long.parseLong(s);
         return null;
     }
 
@@ -128,6 +144,7 @@ public class JwtTokenProvider {
         String username = getUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
+                userDetails, null, userDetails.getAuthorities()
+        );
     }
 }

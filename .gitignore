@@ -1,33 +1,93 @@
-HELP.md
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Maven
+############################
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+############################
+# Gradle
+############################
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+############################
+# IntelliJ IDEA
+############################
+.idea/
 *.iml
 *.ipr
+*.iws
+out/
 
-### NetBeans ###
+############################
+# Eclipse / STS
+############################
+.classpath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+.apt_generated
+.factorypath
+
+############################
+# NetBeans
+############################
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
+############################
+# VS Code
+############################
 .vscode/
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# Env / Secrets
+############################
+.env
+.env.*
+*.env
+
+############################
+############################
+certs/private/
+certs/keystore/
+
+*.key
+*.p12
+*.pfx
+*.jks
+*.csr
+*.der
+
+keystore.b64.txt
+
+############################
+
+############################
+*.tar
+docker-compose.override.yml
+
+############################
+
+############################
+*.tmp
+*.swp
+*.bak

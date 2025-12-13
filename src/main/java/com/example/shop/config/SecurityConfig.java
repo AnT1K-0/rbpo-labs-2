@@ -22,18 +22,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // JWT + REST
+
                 .csrf(csrf -> csrf.disable())
 
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Всё под /api/auth/** открыто для регистрации/логина/refresh
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Всё остальное — только с access-токеном
                         .anyRequest().authenticated()
                 );
 
-        // JWT-фильтр
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

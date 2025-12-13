@@ -28,21 +28,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 1. Всё, что под /api/auth/** — вообще не трогаем
-        if (path.startsWith("/api/auth")) {
+        // auth endpoints — без JWT
+        if (path.startsWith("/api/auth") || path.startsWith("/error")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+            String token = header.substring(7).trim();
 
-            // Если токен валиден — поднимаем аутентификацию
-            if (jwtTokenProvider.validateAccessToken(token)) {
-                Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (!token.isEmpty() && jwtTokenProvider.validateAccessToken(token)) {
+                Authentication auth = jwtTokenProvider.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 

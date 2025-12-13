@@ -112,4 +112,26 @@
 
 ```sql
 CREATE DATABASE shop;
+```
+
+2. Задать переменные окружения (пример Windows PowerShell):
+
+```powershell
+$env:DB_USER="shop_user"
+$env:DB_PASSWORD="<YOUR_PASSWORD>"
+$env:APP_JWT_SECRET="<YOUR_PASSWORD>_very_secret"
+
+# для ЛР6 (HTTPS):
+$env:SSL_KEYSTORE_PATH="C:\\certs\\shop-keystore.p12"
+$env:SSL_KEYSTORE_PASSWORD="<YOUR_PASSWORD>"
+```
+
+3. Запуск:
+
+```bash
 mvn spring-boot:run
+```
+
+После включения TLS приложение поднимается на **https://localhost:8443**.
+
+---
